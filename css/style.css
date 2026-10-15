@@ -1126,3 +1126,29 @@ footer {
   .hero-prev { left: 10px; }
   .hero-next { right: 10px; }
 }
+
+
+/* Corrección del carrusel principal */
+#heroCarrusel.reveal {
+    opacity: 1;
+    transform: none;
+}
+
+#heroCarrusel .hero-slides {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#heroCarrusel .hero-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#heroCarrusel .hero-slide.active {
+    opacity: 1;
+}
