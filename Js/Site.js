@@ -1,62 +1,96 @@
+
 document.addEventListener("DOMContentLoaded", () => {
-  const revealElements = document.querySelectorAll(".reveal");
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15 });
-    revealElements.forEach((el) => observer.observe(el));
-  } else {
-    revealElements.forEach((el) => el.classList.add("visible"));
-  }
-});
+    const carrusel = document.querySelector("#heroCarrusel");
 
+    if (!carrusel) return;
 
-// Carrusel principal".
-const heroCarrusel = document.getElementById("heroCarrusel");
-if (heroCarrusel) {
-  const slides = Array.from(heroCarrusel.querySelectorAll(".hero-slide"));
-  const dots = Array.from(heroCarrusel.querySelectorAll(".hero-dot"));
-  const prev = heroCarrusel.querySelector(".hero-prev");
-  const next = heroCarrusel.querySelector(".hero-next");
-  let current = 0;
-  let timer;
+    const slides = Array.from(
+        carrusel.querySelectorAll(".hero-slide")
+    );
 
-  function mostrarSlide(index) {
-    current = (index + slides.length) % slides.length;
-    slides.forEach((slide, i) => slide.classList.toggle("active", i === current));
+    const dots = Array.from(
+        carrusel.querySelectorAll(".hero-dot")
+    );
+
+    const anterior = carrusel.querySelector(".hero-prev");
+    const siguiente = carrusel.querySelector(".hero-next");
+
+    if (slides.length === 0) return;
+
+    let actual = slides.findIndex(
+        slide => slide.classList.contains("active")
+    );
+
+    if (actual < 0) actual = 0;
+
+    let temporizador;
+
+    function mostrarSlide(indice) {
+        actual = (indice + slides.length) % slides.length;
+
+        slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === actual);
+        });
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle("active", i === actual);
+            dot.setAttribute(
+                "aria-current",
+                i === actual ? "true" : "false"
+            );
+        });
+    }
+
+    function iniciarCarrusel() {
+        clearInterval(temporizador);
+
+        temporizador = setInterval(() => {
+            mostrarSlide(actual + 1);
+        }, 5000);
+    }
+
+    anterior?.addEventListener("click", () => {
+        mostrarSlide(actual - 1);
+        iniciarCarrusel();
+    });
+
+    siguiente?.addEventListener("click", () => {
+        mostrarSlide(actual + 1);
+        iniciarCarrusel();
+    });
+
     dots.forEach((dot, i) => {
-      dot.classList.toggle("active", i === current);
-      dot.setAttribute("aria-current", i === current ? "true" : "false");
+        dot.addEventListener("click", () => {
+            mostrarSlide(i);
+            iniciarCarrusel();
+        });
     });
-  }
 
-  function reiniciarTimer() {
-    clearInterval(timer);
-    timer = setInterval(() => mostrarSlide(current + 1), 4500);
-  }
+    mostrarSlide(actual);
+    iniciarCarrusel();
 
-  prev.addEventListener("click", () => {
-    mostrarSlide(current - 1);
-    reiniciarTimer();
-  });
+    // Animaciones de aparición al desplazarse
+    const elementos = document.querySelectorAll(".reveal");
 
-  next.addEventListener("click", () => {
-    mostrarSlide(current + 1);
-    reiniciarTimer();
-  });
+    if ("IntersectionObserver" in window) {
+        const observador = new IntersectionObserver(
+            entradas => {
+                entradas.forEach(entrada => {
+                    if (entrada.isIntersecting) {
+                        entrada.target.classList.add("visible");
+                        observador.unobserve(entrada.target);
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
 
-  dots.forEach((dot) => {
-    dot.addEventListener("click", () => {
-      mostrarSlide(Number(dot.dataset.slide));
-      reiniciarTimer();
-    });
-  });
-
-  mostrarSlide(0);
-  reiniciarTimer();
-}
+        elementos.forEach(elemento => {
+            observador.observe(elemento);
+        });
+    } else {
+        elementos.forEach(elemento => {
+            elemento.classList.add("visible");
+        });
+    }
+});
